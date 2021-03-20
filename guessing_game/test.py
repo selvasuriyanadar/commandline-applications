@@ -1,4 +1,4 @@
-from .model import start_msg, guessme_msg, GuessMe, help_msg, getStat
+from .model import start_msg, guessme_msg, help_msg, GuessMe, Stat
 from .data.string import guessme_strings
 import json
 import unittest
@@ -9,8 +9,9 @@ class TestModel(unittest.TestCase):
         self.assertEqual(help_msg(), guessme_strings["help"])
 
     def test_initialisation_of_random_integer(self):
+        stat_store = Stat()
         start_msg()
-        stat = getStat()
+        stat = stat_store.getStat()
         self.assertIn("random_integer", stat)
         self.assertIn("guessed", stat)
         self.assertIn("guesses", stat)
@@ -30,26 +31,30 @@ class TestModel(unittest.TestCase):
         self.assertIn("guesses", stat)
 
     def test_guessme_msg_function_small_guess(self):
+        stat_store = Stat()
         start_msg()
-        secret = getStat()["random_integer"]
+        secret = stat_store.getStat()["random_integer"]
         self.assertEqual(guessme_msg(secret+1), guessme_strings["large_guess"])
 
     def test_guessme_msg_function_small_guess(self):
+        stat_store = Stat()
         start_msg()
-        secret = getStat()["random_integer"]
+        secret = stat_store.getStat()["random_integer"]
         self.assertEqual(guessme_msg(secret-1), guessme_strings["small_guess"])
 
     def test_guessme_msg_function_small_guess(self):
+        stat_store = Stat()
         start_msg()
-        secret = getStat()["random_integer"]
+        secret = stat_store.getStat()["random_integer"]
         self.assertEqual(
             guessme_msg(secret),
             guessme_strings["correct_guess"].format(1)
         )
 
     def test_guessme_msg_function_small_guess(self):
+        stat_store = Stat()
         start_msg()
-        secret = getStat()["random_integer"]
+        secret = stat_store.getStat()["random_integer"]
         self.assertEqual(
             guessme_msg(secret),
             guessme_strings["correct_guess"].format(1)

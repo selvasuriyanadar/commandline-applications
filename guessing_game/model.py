@@ -49,48 +49,74 @@ def help_msg():
 # string and data access
 
 def start_msg():
-    putStat(
-        {
-            "random_integer": randint(0, 100),
-            "guessed": False,
-            "guesses": 0,
-        }
-    )
+    stat_store = Stat()
+    stat_store.resetStat()
     return guessme_strings["start"]
 
 # string, data and logic access
 
 def guessme_msg(guess):
-    guess_me = GuessMe(getStat())
+    stat_store = Stat()
+    guess_me = GuessMe(stat_store.getStat())
     if not guess_me.hasGuessed():
 
         if guess_me.guessme(guess):
-            putStat(guess_me.getStat())
+            stat_store.putStat(guess_me.getStat())
             message = guessme_strings["correct_guess"].format(guess_me.guesses)
 
         elif guess_me.isGuessLarge(guess):
-            putStat(guess_me.getStat())
+            stat_store.putStat(guess_me.getStat())
             message = guessme_strings["large_guess"]
 
         else:
-            putStat(guess_me.getStat())
+            stat_store.putStat(guess_me.getStat())
             message = guessme_strings["small_guess"]
+
     else:
         message = guessme_strings["already_guessed"]
 
     return message 
 
 
-# direct data access
+# data
 
-def getStat():
-    with open("guessing_game/data/random_integer.json") as f:
-        return json.load(f)
+class Stat:
 
-def putStat(stat):
-    with open("guessing_game/data/random_integer.json", "w") as f:
-        json.dump(
-            stat,
-            f
-        )
+    def __init__(self):
+        self.path = "guessing_game/data/random_integer.json"
 
+    def getStat(self):
+        with open(self.path) as f:
+            try:
+                stat = json.load(f)
+
+                if not self.validateStat(stat):
+                    stat = self.defaultStat()
+    
+            except JSONDecodeError as e:
+                stat = self.defaultStat()
+
+            return stat
+
+    def putStat(self, stat):
+        with open(self.path, "w") as f:
+            json.dump(stat, f)
+    
+    def resetStat(self):
+        self.putStat(self.defaultStat())
+    
+    def defaultStat(self):
+        return {
+                "random_integer": randint(0, 100),
+                "guessed": False,
+                "guesses": 0,
+            }
+
+    def validateStat(self, stat):
+        isvalid = False
+        if all(k in stat for k in ["random_integer", "guessed", "guesses"]):
+            if (isinstance(stat["random_integer"], int) and
+                isinstance(stat["guessed"], bool) and
+                isinstance(stat["guesses"], int)):
+                isvalid = True
+        return isvalid
