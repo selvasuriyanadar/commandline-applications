@@ -1,10 +1,10 @@
-from .model import help_msg
+from .model import help_msg, start_msg, guessme_msg
 
-def start_cntrl(a):
-    pass
+def start_msg_cntrl(a):
+    return start_msg()
 
-def guessme_cntrl(a):
-    pass
+def guessme_msg_cntrl(a):
+    return guessme_msg(int(a["g"].value[0]))
 
 def help_msg_cntrl(a):
     return help_msg()
