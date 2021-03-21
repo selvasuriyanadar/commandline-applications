@@ -1,50 +1,9 @@
 from random import randint
 import json
-from .data.string import guessme_strings
+from json import JSONDecodeError
+from .data.strings import guessme_strings
 
-# logic
-
-class GuessMe:
-
-    def __init__(self, stat):
-        self.secret = stat["random_integer"]
-        self.guessed = stat["guessed"]
-        self.guesses = stat["guesses"]
-
-    def isGuessLarge(self, guess):
-        return self.secret < guess
-
-    def isGuessSmall(self, guess):
-        return self.secret > guess
-
-    def hasGuessed(self):
-        return self.guessed
-
-    def guessme(self, guess):
-        self.newGuess(guess)
-        return self.matchGuess(guess)
-
-    def newGuess(self, guess):
-        self.guesses+=1
-
-    def matchGuess(self, guess):
-        if guess == self.secret:
-            self.guessed = True
-            return True
-        return False
-
-    def getStat(self):
-        return {
-                "random_integer": self.secret,
-                "guessed": self.guessed,
-                "guesses": self.guesses,
-            }
-
-
-# string access
-
-def help_msg():
-    return guessme_strings["help"]
+# drivers
 
 # string and data access
 
@@ -62,7 +21,7 @@ def guessme_msg(guess):
 
         if guess_me.guessme(guess):
             stat_store.putStat(guess_me.getStat())
-            message = guessme_strings["correct_guess"].format(guess_me.guesses)
+            message = guessme_strings["correct_guess"].format(guess_me.getGuesses())
 
         elif guess_me.isGuessLarge(guess):
             stat_store.putStat(guess_me.getStat())
@@ -78,28 +37,95 @@ def guessme_msg(guess):
     return message 
 
 
-# data
+# logic
 
-class Stat:
+class GuessMe:
+    """
+    fields:
+       secret is immutable integer.
+       guessed which is initially False, is toggleable only once when the
+    guess received matches the secret.
+       guesses(initially zero) is incremented every once when a guess is
+    received.
 
-    def __init__(self):
-        self.path = "guessing_game/data/random_integer.json"
+    incomming:
+       guess an integer.
+    """
+    def __init__(self, stat):
+        self._secret = stat["random_integer"]
+        self._guessed = stat["guessed"]
+        self._guesses = stat["guesses"]
+
+    def isGuessLarge(self, guess):
+        return self._secret < guess
+
+    def isGuessSmall(self, guess):
+        return self._secret > guess
+
+    def hasGuessed(self):
+        return self._guessed
+
+    def getGuesses(self):
+        return self._guesses
+
+    def guessme(self, guess):
+        self._newGuess(guess)
+        return self._matchGuess(guess)
+
+    def _newGuess(self, guess):
+        self._guesses+=1
+
+    def _matchGuess(self, guess):
+        if guess == self._secret:
+            self._guessed = True
+            return True
+        return False
 
     def getStat(self):
-        with open(self.path) as f:
-            try:
+        return {
+                "random_integer": self._secret,
+                "guessed": self._guessed,
+                "guesses": self._guesses,
+            }
+
+
+# data
+
+class StatMisformed(Exception):
+    pass
+
+class StatsNotEquivalent(Exception):
+    pass
+
+class Stat:
+    """
+    storage:
+       path holds the path of a json file.
+
+    value:
+       random_integer an int which defaults to any random integer.
+       guessed is a bool, default is False.
+       guesses is an int, default is 0.
+
+    getStat:
+       if a valid stat is not get then returns default stat
+    """
+    def __init__(self):
+        self._path = "guessing_game/data/random_integer.json"
+
+    def getStat(self):
+        try:
+            with open(self._path) as f:
                 stat = json.load(f)
+            self.validateStat(stat)
 
-                if not self.validateStat(stat):
-                    stat = self.defaultStat()
-    
-            except JSONDecodeError as e:
-                stat = self.defaultStat()
+        except (FileNotFoundError, JSONDecodeError, StatMisformed) as e:
+            stat = self.defaultStat()
 
-            return stat
+        return stat
 
     def putStat(self, stat):
-        with open(self.path, "w") as f:
+        with open(self._path, "w") as f:
             json.dump(stat, f)
     
     def resetStat(self):
@@ -113,10 +139,18 @@ class Stat:
             }
 
     def validateStat(self, stat):
-        isvalid = False
         if all(k in stat for k in ["random_integer", "guessed", "guesses"]):
             if (isinstance(stat["random_integer"], int) and
                 isinstance(stat["guessed"], bool) and
                 isinstance(stat["guesses"], int)):
-                isvalid = True
-        return isvalid
+                return True
+        raise StatMisformed
+
+    def assertEquivalent(self, stat1, stat2):
+        self.validateStat(stat1)
+        self.validateStat(stat2)
+        if (stat1["guessed"] is stat2["guessed"] and
+            stat1["guesses"] is stat2["guesses"]):
+            return True
+        raise StatsNotEquivalent
+

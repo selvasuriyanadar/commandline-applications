@@ -1,0 +1,4 @@
+guessing game:
+    logging
+    functional test
+    getting the data file path the right way
