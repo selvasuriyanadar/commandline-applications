@@ -1,4 +1,3 @@
 guessing game:
+    using sqlite and postgre databases
     logging
-    functional test
-    getting the data file path the right way

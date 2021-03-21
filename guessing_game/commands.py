@@ -1,4 +1,8 @@
-from .controller import help_msg_cntrl, start_msg_cntrl, guessme_msg_cntrl
+from .view import help_msg_view, start_msg_view, guessme_msg_view
+from paraivari.parser import parseLog as parse
+
+def run(args):
+    return parse(args, config_data)
 
 config_data = {
         "thedirectcommand": {
@@ -15,17 +19,17 @@ config_data = {
                             {
                     "local": ["h"],
                     "local_defaults": {},
-                    "func": help_msg_cntrl
+                    "func": help_msg_view
                 },
                             {
                     "local": ["s"],
                     "local_defaults": {},
-                    "func": start_msg_cntrl
+                    "func": start_msg_view
                 },
                             {
                     "local": ["g"],
                     "local_defaults": {},
-                    "func": guessme_msg_cntrl
+                    "func": guessme_msg_view
                 },
             ]
         }

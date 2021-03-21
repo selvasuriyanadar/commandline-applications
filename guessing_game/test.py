@@ -1,10 +1,9 @@
 from .model import start_msg, guessme_msg, GuessMe, Stat
-from .controller import guessme_msg_cntrl
-from .data.strings import guessme_strings, guessme_help_strings
+from .view import guessme_msg_view
+from .data.strings import guessme_strings
 from paraivari.payanam.koththisarukku.ArgumentExtractionLib import Argument
-import json
-import unittest
-import os
+import json, unittest
+from importlib import resources
 
 class TestGuessMeLogicClass(unittest.TestCase):
 
@@ -21,15 +20,12 @@ class TestGuessMeLogicClass(unittest.TestCase):
 
 class TestStatDataClass(unittest.TestCase):
 
-    def test_getStat_when_file_does_not_exist(self):
-        stat_store = Stat()
-        os.remove(stat_store._path)
-        stat_store.assertEquivalent(stat_store.getStat(), stat_store.defaultStat())
-
-    def test_putStat_when_file_does_not_exist(self):
-        stat_store = Stat()
-        os.remove(stat_store._path)
-        stat_store.putStat(stat_store.defaultStat())
+    def test_does_the_random_integer_json_file_exists(self):
+        with resources.path(
+                "guessing_game.data",
+                "random_integer.json"
+            ) as path:
+            pass
 
     def test_getStat_when_file_has_invalid_json(self):
         stat_store = Stat()
@@ -70,13 +66,15 @@ class TestModel(unittest.TestCase):
         stat_store = Stat()
         start_msg()
         secret = stat_store.getStat()["random_integer"]
-        self.assertEqual(guessme_msg(secret+1), guessme_strings["large_guess"])
+        self.assertEqual(guessme_msg(secret+1), guessme_strings["large_guess"],
+            f"the secret is {secret}")
 
     def test_guessme_msg_function_small_guess(self):
         stat_store = Stat()
         start_msg()
         secret = stat_store.getStat()["random_integer"]
-        self.assertEqual(guessme_msg(secret-1), guessme_strings["small_guess"])
+        self.assertEqual(guessme_msg(secret-1), guessme_strings["small_guess"],
+            f"the secret is {secret}")
 
     def test_guessme_msg_function_correct_guess(self):
         stat_store = Stat()
@@ -84,7 +82,8 @@ class TestModel(unittest.TestCase):
         secret = stat_store.getStat()["random_integer"]
         self.assertEqual(
             guessme_msg(secret),
-            guessme_strings["correct_guess"].format(1)
+            guessme_strings["correct_guess"].format(1),
+            f"the secret is {secret}"
         )
 
     def test_guessme_msg_function_guess_after_correct_guess(self):
@@ -93,24 +92,27 @@ class TestModel(unittest.TestCase):
         secret = stat_store.getStat()["random_integer"]
         self.assertEqual(
             guessme_msg(secret),
-            guessme_strings["correct_guess"].format(1)
+            guessme_strings["correct_guess"].format(1),
+            f"the secret is {secret}"
         )
         self.assertEqual(guessme_msg(1000), guessme_strings["already_guessed"])
 
 class TestController(unittest.TestCase):
     
     def test_guessme_input_and_output(self):
+        stat_store = Stat()
         start_msg()
+        secret = stat_store.getStat()["random_integer"]
         self.assertTrue(isinstance(
-            guessme_msg_cntrl(
-                {"g": Argument("g", [3], 1)}
+            guessme_msg_view(
+                {"g": Argument("g", [secret+1], 1)}
             ),
             str
         ))
         self.assertEqual(
-            guessme_msg_cntrl(
+            guessme_msg_view(
                 {"g": Argument("g", ["g"], 1)}
             ),
-            guessme_help_strings["guess_error"]
+            guessme_strings["guess_error"]
         )
 

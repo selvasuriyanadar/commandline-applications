@@ -2,42 +2,61 @@ from random import randint
 import json
 from json import JSONDecodeError
 from .data.strings import guessme_strings
+from importlib import resources
 
 # drivers
+
+# string
+
+def help_msg():
+    return guessme_strings["help"]
 
 # string and data access
 
 def start_msg():
     stat_store = Stat()
     stat_store.resetStat()
+
     return guessme_strings["start"]
 
-# string, data and logic access
-
-def guessme_msg(guess):
+def guessme_msg(guess=None):
     stat_store = Stat()
     guess_me = GuessMe(stat_store.getStat())
-    if not guess_me.hasGuessed():
 
-        if guess_me.guessme(guess):
-            stat_store.putStat(guess_me.getStat())
-            message = guessme_strings["correct_guess"].format(guess_me.getGuesses())
+    if guess is not None and not guess_me.hasGuessed():
+        message = guessme(guess_me, guess)
+    elif guess_me.hasGuessed():
+        message = guessme_strings["already_guessed"]
+    else:
+        message = guessme_strings["guess_error"]
 
-        elif guess_me.isGuessLarge(guess):
-            stat_store.putStat(guess_me.getStat())
-            message = guessme_strings["large_guess"]
+    stat_store.putStat(guess_me.getStat())
+    return message 
 
-        else:
-            stat_store.putStat(guess_me.getStat())
-            message = guessme_strings["small_guess"]
+# string and logic access
+
+def guessme(guess_me, guess):
+    if guess_me.guessme(guess):
+        message = guessme_strings["correct_guess"].format(guess_me.getGuesses())
+
+    elif guess_me.isGuessLarge(guess):
+        message = guessme_strings["large_guess"]
+
+    elif guess_me.isGuessSmall(guess):
+        message = guessme_strings["small_guess"]
 
     else:
-        message = guessme_strings["already_guessed"]
-
-    return message 
+        raise NotGuessable
+    return message
 
 
 # logic
+
+class AlreadyGuessed(Exception):
+    pass
+
+class NotGuessable(Exception):
+    pass
 
 class GuessMe:
     """
@@ -69,8 +88,11 @@ class GuessMe:
         return self._guesses
 
     def guessme(self, guess):
-        self._newGuess(guess)
-        return self._matchGuess(guess)
+        if not self.hasGuessed():
+            self._newGuess(guess)
+            return self._matchGuess(guess)
+        else:
+            raise AlreadyGuessed
 
     def _newGuess(self, guess):
         self._guesses+=1
@@ -111,7 +133,11 @@ class Stat:
        if a valid stat is not get then returns default stat
     """
     def __init__(self):
-        self._path = "guessing_game/data/random_integer.json"
+        with resources.path(
+                "guessing_game.data",
+                "random_integer.json"
+            ) as path:
+            self._path = path
 
     def getStat(self):
         try:
