@@ -7,7 +7,7 @@ def run(args):
 config_data = {
         "thedirectcommand": {
             "short_input_names": [],
-            "long_input_names": {},
+            "long_input_names": {"g": "guess"},
             "positional_arguments": [],
             "argument_value_properties": {
                     "g": [1],
