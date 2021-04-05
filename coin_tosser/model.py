@@ -4,26 +4,60 @@ import random
 
 user1 = 1
 user2 = 2
-users = [user1, user2]
+user3 = 3
+user4 = 4
+users = [user1, user2, user3, user4]
+
+# data access
 
 def start_game(coin):
-    with open("coin_tosser/coin.json", "w") as f:
-        json.dump({"coin": coin}, f)
-    user_store(user1)
+    coin_store(coin)
+    user_store(users[0])
     reset_result()
 
-def coin_tosser():
-    with open("coin_tosser/user.json") as f:
-        user = json.load(f)["user"]
-    result = toss()
-    result_store(user, result)
-    result = {user: result}
+# logic and data access
 
-    user = rotateUser(user)
-    user_store(user)
+def coin_tosser():
+    results = get_result()
+    if not gameOver(results):
+        user = get_user()
+        coin = toss()
+        result_store(user, coin)
+
+        results = get_result()
+        if not gameOver(results):
+            user_store(rotateUser(user))
+
+        result = {user: [1, coin]}
+
+    else:
+        result = None
+
     return result
 
+def show_result():
+    results = get_result()
+    result = compress_result(results, get_coin())
+    return result, declare_winner(result)
+
+# logic and string access
+
+
 # logic
+
+def declare_winner(result):
+    max_count = 0
+    for user in result:
+        if result[user][0] > max_count:
+            max_count = result[user][0]
+    return [user for user in result if result[user][0] == max_count]
+
+def compress_result(results, coin):
+    fresult = {}
+    for user in results:
+        coins = [r for r in results[user] if r == coin]
+        fresult[user] = [len(coins), coin]
+    return fresult
 
 def toss():
     return bool(random.getrandbits(1))
@@ -38,29 +72,54 @@ def rotateUser(user):
         raise IndexError
 
     return result
-    
+
+def gameOver(results):
+    return all(len(results[user]) == 5 for user in users)
 
 # data
+
+def coin_store(coin):
+    with open("coin_tosser/coin.json", "w") as f:
+        json.dump({"coin": coin}, f)
+
+def get_coin():
+    with open("coin_tosser/coin.json") as f:
+        return json.load(f)["coin"]
 
 def user_store(user):
     with open("coin_tosser/user.json", "w") as f:
         json.dump({"user": user}, f)
+
+def get_user():
+    with open("coin_tosser/user.json") as f:
+        return json.load(f)["user"]
 
 def result_store(user, result):
     try:
         with open("coin_tosser/results.json") as f:
             results = json.load(f)
     except (JSONDecodeError) as e:
-        results = {}
+        results = empty_result()
 
     if str(user) in results:
         results[str(user)].append(result)
     else:
-        results[str(user)] = [result]
+        raise KeyError
 
     with open("coin_tosser/results.json", "w") as f:
         json.dump(results, f)
 
 def reset_result():
     with open("coin_tosser/results.json", "w") as f:
-        json.dump({}, f)
+        json.dump(empty_result(), f)
+
+def empty_result():
+    return {str(user): [] for user in users}
+
+def get_result():
+    with open("coin_tosser/results.json") as f:
+        results = json.load(f)
+        for k in list(results.keys()):
+            results[int(k)] = results.pop(k)
+        return results
+

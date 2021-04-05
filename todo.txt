@@ -1,3 +1,9 @@
 guessing game:
     using sqlite and postgre databases
     logging
+
+coin tosser:
+    number of users can be set by the user
+    user names can be set by the user
+    number of turns for each user can be set
+

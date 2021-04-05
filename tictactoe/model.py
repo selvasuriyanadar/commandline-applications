@@ -1,11 +1,13 @@
-class RowDoesNotExist(Exception):
+class ColIndexOutOfBound(Exception):
     pass
 
 class RowIndexOutOfBound(Exception):
     pass
 
 class LineIndexOutOfBound(Exception):
-    pass
+    
+    def __init__(self, i):
+        self.index = i
 
 class LineNav:
     """
@@ -41,80 +43,158 @@ class LineNav:
         elif i is 0:
             return None
         else:
-            raise LineIndexOutOfBound
+            raise LineIndexOutOfBound(i)
 
     def next(self, i):
         if i >= 0 and i < self._length-1:
             return i+1
-        elif i is self._length:
+        elif i is self._length-1:
             return None
         else:
-            raise LineIndexOutOfBound
+            raise LineIndexOutOfBound(i)
+
+class SquareNav:
+    """
+
+    """
+
+    def __init__(self, s):
+        self.scale = LineNav(s)
+        self.corners = [
+            (self.getPrevInRow, self.getPrevInCol),
+            (self.getNextInRow, self.getPrevInCol),
+            (self.getNextInRow, self.getNextInCol),
+            (self.getPrevInRow, self.getNextInCol)
+        ]
 
 
-class tictactoe:
-    """
-    fields:
-       the board contains 9 boxes.
-       the board is a dict with integer keys and integer values.
-       the keys of the board dict represent box number and the values represent
-    the mark (none, circle, cross) put on the box.
-       the none mark is represented by zero the marks cross and circle are
-    represented by 1 and 2 respectively and these are constants.
-       a box with none mark can only be marked with any other mark only once.
-       the twins is a dict with keys as the pairs of boxes that has a chance for
-    getting a win and the box which may form the win trio with the pair as the
-    value.
-       
-    """
+    def getPrevInRow(self, n):
+        try:
+            if self.scale.prev(self.getCol(n)) is not None:
+                result = n-1
+            else:
+                result = None
+            return result
+        except LineIndexOutOfBound as e:
+            raise ColIndexOutOfBound
+
+    def getNextInRow(self, n):
+        try:
+            if self.scale.next(self.getCol(n)) is not None:
+                result = n+1
+            else:
+                result = None
+            return result
+        except LineIndexOutOfBound as e:
+            raise ColIndexOutOfBound
+
+    def getPrevInCol(self, n):
+        try:
+            if self.scale.prev(self.getRow(n)) is not None:
+                result = n-self.scale.len()
+            else:
+                result = None
+            return result
+        except LineIndexOutOfBound as e:
+            raise RowIndexOutOfBound
+
+    def getNextInCol(self, n):
+        try:
+            if self.scale.next(self.getRow(n)) is not None:
+                result = n+self.scale.len()
+            else:
+                result = None
+            return result
+        except LineIndexOutOfBound as e:
+            raise RowIndexOutOfBound
+
+    def getToCor(self, corner, n):
+        x = self.corners[corner][0](n)
+        return self.corners[corner][1](x) if x is not None else None
+
+    def getRow(self, n):
+        return int(n/self.scale.len())
+
+    def getCol(self, n):
+        return n%self.scale.len()
+
+
+class Vari:
+
+    def __init__(self, id):
+        self.id = id
+
+class Kuchchi:
     
-    def __init__(self):
-        self._board = {n:0 for n in range(1, 10)}
-        self._cross = 1
-        self._circle = 2
-        self.scale = LineNav(3)
-        self._twins = {}
+    def __init__(self, vari_id, part):
+        self.vari_id = vari_id
+        self.part = part
 
-    def _markBox(self, n, mark):
-        if not self._board[n]:
-            self._board[n] = mark
+class Kattu:
 
-    def crossBox(self, n):
-        self._markBox(n, self._cross)
+    def __init__(self, kuchchigal, user):
+        self.user = user
+        self.kuchchigal = kuchchigal
 
-    def circleBox(self, n):
-        self._markBox(n, self._circle)
+class Kaaigal:
 
-    def findTwin(self, n):
+    def __init__(self, user, varigal):
+        self.user = user
+        self.varigal = varigal
+
+    def maththi(self):
+        self.varigal.chear(Kattu(
+                [Kuchchi(i, 0) for i in range(0, 4)],
+                self.user
+            ))
+
+    def monai0(self):
+        self.varigal.chear(Kattu(
+                [
+                    Kuchchi(0, 1),
+                    Kuchchi(4, 1),
+                    Kuchchi(6, 1)
+                ],
+                self.user
+            ))
         
-    def exploreTwins(self, n):
+    def monai1(self):
+        self.varigal.chear(Kattu(
+                [
+                    Kuchchi(2, 1),
+                    Kuchchi(4, -1),
+                    Kuchchi(7, 1)
+                ],
+                self.user
+            ))
+        
+    def monai2(self):
+        self.varigal.chear(Kattu(
+                [
+                    Kuchchi(0, -1),
+                    Kuchchi(5, -1),
+                    Kuchchi(7, -1)
+                ],
+                self.user
+            ))
+        
+    def monai3(self):
+        self.varigal.chear(Kattu(
+                [
+                    Kuchchi(2, -1),
+                    Kuchchi(5, 1),
+                    Kuchchi(6, -1)
+                ],
+                self.user
+            ))
 
-        def splitRows(r):
-            boxes_behind = r*self.scale.len()
-            return self._board[boxes_behind:boxes_behind+self.scale.len()]
+class Varigal:
+    pass
 
-        def getPrevInRow(rn):
-            try:
-                return self.scale.prev(rn)
-            except LineIndexOutOfBound as e:
-                raise RowIndexOutOfBound
+class Palagai:
 
-        def getAheadInRow(rn):
-            try:
-                return self.scale.next(rn)
-            except LineIndexOutOfBound as e:
-                raise RowIndexOutOfBound
-
-        def getUpInCol(r, rn):
-            if not self.scale.prev(r):
-                
-
-        def getDownInCol(r, rn):
-            pass
-
-        def getRow(n):
-            return n/row_box_count
-
-        def exploreHorizontal(n):
-            pass
+    def __init__(self):
+        self.varigal = Varigal([Vari(i) for i in range(0, 8)])
+        self.kaaigal0 = Kaaigal(0, self.varigal)
+        self.kaaigal1 = Kaaigal(1, self.varigal)
 

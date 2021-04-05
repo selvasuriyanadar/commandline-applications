@@ -1,3 +1,5 @@
 __pycache__
 venv
-testscript.sh
+package.json
+package-lock.json
+node_modules

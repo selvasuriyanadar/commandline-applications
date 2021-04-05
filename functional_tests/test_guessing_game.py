@@ -67,7 +67,8 @@ class TestGuessingGame(TestCase):
         output = run(args)
         self.assertIn("Now the game begins. Come on start your guesses, you have to get to me!", output)
 
-        secret = Stat().getStat()["random_integer"]
+        with Stat() as stat_store:
+            secret = stat_store.getStat()["random_integer"]
 
         # Then she enters a guess
 
@@ -77,20 +78,15 @@ class TestGuessingGame(TestCase):
 
         args = ["-s"]
         output = run(args)
-        secret = Stat().getStat()["random_integer"]
+        with Stat() as stat_store:
+            secret = stat_store.getStat()["random_integer"]
         self.play_game_knowing_secret(secret)
 
     def test_gameplay_skipping_the_start_step(self):
-        secret = 40
-        with open(Stat()._path, "w") as f:
-            json.dump({
-                    "random_integer":secret,
-                    "guessed":False,
-                    "guesses":0
-                },
-                f
-            )
-
+        with Stat() as stat_store:
+            stat_store.resetStat()
+            secret = stat_store.getStat()["random_integer"]
+        
         # Sana quikly enters a guess
 
         self.play_game_knowing_secret(secret)
