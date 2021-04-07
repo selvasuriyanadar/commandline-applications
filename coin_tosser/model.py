@@ -1,6 +1,7 @@
 import json
 from json import JSONDecodeError
 import random
+from importlib import resources
 
 user1 = 1
 user2 = 2
@@ -78,25 +79,43 @@ def gameOver(results):
 
 # data
 
+with resources.path(
+        "coin_tosser.data",
+        "coin.json"
+    ) as path:
+    coin_json = path
+
 def coin_store(coin):
-    with open("coin_tosser/coin.json", "w") as f:
+    with open(coin_json, "w") as f:
         json.dump({"coin": coin}, f)
 
 def get_coin():
-    with open("coin_tosser/coin.json") as f:
+    with open(coin_json) as f:
         return json.load(f)["coin"]
 
+with resources.path(
+        "coin_tosser.data",
+        "user.json"
+    ) as path:
+    user_json = path
+
 def user_store(user):
-    with open("coin_tosser/user.json", "w") as f:
+    with open(user_json, "w") as f:
         json.dump({"user": user}, f)
 
 def get_user():
-    with open("coin_tosser/user.json") as f:
+    with open(user_json) as f:
         return json.load(f)["user"]
+
+with resources.path(
+        "coin_tosser.data",
+        "results.json"
+    ) as path:
+    result_json = path
 
 def result_store(user, result):
     try:
-        with open("coin_tosser/results.json") as f:
+        with open(result_json) as f:
             results = json.load(f)
     except (JSONDecodeError) as e:
         results = empty_result()
@@ -106,20 +125,20 @@ def result_store(user, result):
     else:
         raise KeyError
 
-    with open("coin_tosser/results.json", "w") as f:
+    with open(result_json, "w") as f:
         json.dump(results, f)
 
-def reset_result():
-    with open("coin_tosser/results.json", "w") as f:
-        json.dump(empty_result(), f)
-
-def empty_result():
-    return {str(user): [] for user in users}
-
 def get_result():
-    with open("coin_tosser/results.json") as f:
+    with open(result_json) as f:
         results = json.load(f)
         for k in list(results.keys()):
             results[int(k)] = results.pop(k)
         return results
+
+def reset_result():
+    with open(result_json, "w") as f:
+        json.dump(empty_result(), f)
+
+def empty_result():
+    return {str(user): [] for user in users}
 
