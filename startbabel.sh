@@ -1,3 +1,3 @@
 #!/bin/bash
 
-npx babel --watch $1 --out-dir $2 --presets react-app/prod
+npx babel --watch $1/jsx --out-dir $1 --presets react-app/prod

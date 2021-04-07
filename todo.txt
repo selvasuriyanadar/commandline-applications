@@ -7,3 +7,6 @@ coin tosser:
     user names can be set by the user
     number of turns for each user can be set
 
+from now on:
+    handling content type not 'application/json' and expected key not found in
+    json data errors

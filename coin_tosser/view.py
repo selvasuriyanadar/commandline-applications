@@ -87,4 +87,4 @@ def toss_view(a):
     return msg
 
 def help_view(a):
-    pass
+    return "This is a coin tossing game"

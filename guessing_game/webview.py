@@ -1,10 +1,10 @@
-from .model import start_msg, guessme_msg, help_msg
+from .model import guessme_msg
 from .view import start_msg_view, help_msg_view, guessme_msg_view
 from flask import Flask, render_template, request
 
 app = Flask(__name__)
 
-# VIEW
+# Web Pages
 
 @app.route("/")
 def home_view():

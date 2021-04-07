@@ -1,0 +1,27 @@
+.welcome {
+}
+
+.menu-button {
+    margin: 12px;
+}
+
+.head-container {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+}
+
+.body-container {
+    display: flex;
+    flex-direction: column;
+    padding: 125px;
+    align-items: center;
+}
+
+.hitter {
+    width: 236px;
+    height: 144px;
+    font-size: 60px;
+    padding: 70px;
+}
+
