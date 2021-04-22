@@ -1,16 +1,8 @@
 from .model import start_game
 from .view import toss_view, help_view
-from flask import Flask, render_template, request
+from flask import Flask, request
 
 app = Flask(__name__)
-
-# Web Pages
-
-@app.route('/')
-def game():
-    return render_template('game.html')
-
-# API
 
 @app.route('/api/start', methods=['POST'])
 def start_api_view():

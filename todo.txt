@@ -1,5 +1,5 @@
 guessing game:
-    using sqlite and postgre databases
+    using postgre databases
     logging
 
 coin tosser:
