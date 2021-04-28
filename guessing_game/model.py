@@ -92,9 +92,6 @@ class GuessMe:
     def hasGuessed(self):
         return self._guessed
 
-    def getGuesses(self):
-        return self._guesses
-
     def guessme(self, guess):
         if not self.hasGuessed():
             self._newGuess(guess)

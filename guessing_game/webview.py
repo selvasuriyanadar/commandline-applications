@@ -8,7 +8,7 @@ app = Flask(__name__)
 @app.route("/api/guessme", methods=['PUT'])
 def start_api_view():
     start()
-    return {}
+    return {'status': 'success'}
 
 @app.route("/api/guessme", methods=['POST'])
 def guessme_msg_view():
